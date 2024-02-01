@@ -40,22 +40,23 @@ def ai(prompt:str):
         messages=[
             {
                 "role": "user",
-                "content": f"**Math Question Correction:**\n\nPlease correct the following math question. The question is originally in Sinhala but has been translated into English. Ensure the grammar, syntax, and clarity of the question. If there are any mathematical errors, correct them as well. Your response should be a properly formatted math question.\n\n**Original Question (Translated from Sinhala):**\n\n\"{prompt}\"\n\n**Corrected Question:**\n\n",
+                "content": f"**Math Question Correction:**\n\nPlease correct the following math question. The question is originally in Sinhala but has been translated into English. Ensure the grammar, syntax, and clarity of the question. Also, make sure the question has proper meaning. If there are any mathematical errors, correct them as well. Your response should be a properly formatted math question. (This is for Sri Lankan GCE Andvanced Level High School Examination). Dont add anything additional. This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. These are questions. Make sure the question makes sense. You may swap its order or order of words if needed.\n\n**Original Question (Translated from Sinhala):**\n\n\"{prompt}\"\n\n**Corrected Question:**\n\n",
             }
         ],
-        model="gpt-3.5-turbo",
+        model="gpt-4-0125-preview",
     )
 
-    print(chat_completion.choices[0].message.content)
+    return chat_completion.choices[0].message.content
 
 def main():
     prompt = "දීර්ග බෙදීම මගින් පහත බහුපද ඉදිරියෙන් දැක්වෙන ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"
-    print(prompt)
+    print(f"Original:\n---\n{prompt}\n")
     replaced = replace_words(text=prompt)
-    print(replaced)
+    print(f"Stage 1:\n---\n{replaced}\n")
     translated = translate_words(replaced)
-    print(translated)
+    print(f"Stage 2:\n---\n{translated}\n")
     fixed = ai(translated)
+    print(f"Stage 3:\n---\n{fixed}\n")
 
 if __name__ == "__main__":
     main()
