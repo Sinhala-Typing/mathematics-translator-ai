@@ -59,5 +59,14 @@ def main(prompt: str):
     return fixed
 
 
-iface = gr.Interface(fn=main, inputs="text", outputs="text")
+iface = gr.Interface(
+    fn=main, 
+    inputs="text", outputs="text",
+    title="Sinhala Math Question to English",
+    theme="compact",
+    description="Translate Sinhala math questions from Sinhala to English for Sri Lankan GCE Advanced Level Examination.",
+    examples=[
+        ["දීර්ග බෙදීම මගින් පහත බහුපද ඉදිරියෙන් දැක්වෙන ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"]
+    ]
+)
 iface.launch()
