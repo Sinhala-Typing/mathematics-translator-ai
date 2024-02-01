@@ -17,9 +17,11 @@ data = {
     "ලබ්ධිය": "quotient",
 }
 
-def replace_words(text):
-    pass
-
+def replace_words(text: str):
+    for k,v in data.items():
+        if k in text:
+            text.replace(k, v)
+    return 
 
 def ai():
     chat_completion = client.chat.completions.create(
@@ -35,7 +37,9 @@ def ai():
     print(chat_completion)
 
 def main():
-    ...
+    prompt = "දීර්ග බෙදීම මගින් පහත බහුපද ඉදිරියෙන් දැක්වෙන ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"
+    replaced = replace_words(text=prompt)
+    print(replaced)
 
 if __name__ == "__main__":
     main()
