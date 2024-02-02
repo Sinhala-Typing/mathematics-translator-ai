@@ -46,7 +46,8 @@ def load_data() -> t.Dict[str, str]:
         }
     return data
 
-def load_prompt() -> str:
+
+def load_prompt_custom_algorithm() -> str:
     """
     Generate a prompt for the AI model.
 
@@ -72,19 +73,49 @@ def load_prompt() -> str:
     txt +=  "\n\n**Original Question (Translated from Sinhala):**\n\n"
     txt += "\"{prompt}\""
     txt += "\n\n**Corrected Question:**\n\n"
-    
     return txt
 
 
+def load_prompt_full_ai() -> str:
+    global data
+    txt: str = "**Math Question Translation from Sinhala to English:**\n\n " 
+    txt += "Please translate the following math question. Dont refer to the chat history. Treat this as a completely new question. "
+    txt += "These are the special translations to remember when translating:\n"
+    for k,v in data.items():
+        txt += f"{k} means: {v}"
+    txt += "\n\n"
+    txt += "Ensure the grammar, syntax, and clarity of the question. "
+    txt += "Also, make sure the question has proper meaning. "
+    txt += "If there are any mathematical errors, correct them as well. "
+    txt += "Your response should be a properly formatted math question. "
+    txt += "(This is for Sri Lankan GCE Andvanced Level High School Examination). "
+    txt += "Dont add anything additional. "
+    txt += "This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. "
+    txt += "These are questions. Make sure the question makes sense. "
+    txt += "You may swap its order or order of words if needed."
+    txt +=  "\n\n**Original Question (Translated from Sinhala):**\n\n"
+    txt += "\"{prompt}\""
+    txt += "\n\n**Corrected Question:**\n\n"
+    return txt
+
+# -----
+# Program Code
+# -----
 client: OpenAI = OpenAI(api_key=openai_api_key)
 
 data: t.Dict[str, str] = load_data()
 
 
+def reload_data():
+    global data
+    data = load_data()
+    
+    
 def replace_words(text: str) -> t.Optional[str]:
     """
     Stage 1 of Translation: Replace Sinhala words in the given text with their corresponding English translations.
-
+    Used only in "Custom Algorithm" approach.
+    
     Args:
         text (str): The input text containing Sinhala words to be replaced.
 
@@ -110,6 +141,7 @@ def replace_words(text: str) -> t.Optional[str]:
 def translate_words(text: str) -> t.Optional[str]:
     """
     Stage 2 of Translation: Translate Sinhala text to English using Google Translate.
+    Used only in "Custom Algorithm" approach.
 
     Args:
         text (str): The input Sinhala text to be translated.
@@ -132,19 +164,22 @@ def translate_words(text: str) -> t.Optional[str]:
     except Exception as e:
         logging.error(f"Translation failed: {e}")
         return None
+ 
 
-
-def ai(prompt: str) -> t.Optional[str]:
+def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai") -> t.Optional[str]:
     """
-    Stage 3 of Translation: Fix the grammar of the math question using an AI model.
+    Perform AI-based correction of a math question.
 
     Args:
-        prompt (str): The original math question in which has undergone both Stage 1 and Stage 2.
+        prompt (str): The input math question in Sinhala Unicode.
+        mode (Literal["full_ai", "custom_algorithm"], optional): The mode of operation.
+            Either "full_ai" or "custom_algorithm". Defaults to "full_ai".
 
     Returns:
         Optional[str]: The corrected math question in English, or None if an error occurs.
 
     Raises:
+        ValueError: If the mode is not one of "full_ai" or "custom_algorithm".
         Any Exception: If an error occurs during the AI completion process.
 
     Notes:
@@ -157,7 +192,7 @@ def ai(prompt: str) -> t.Optional[str]:
             messages=[
                 {
                     "role": "user",
-                    "content": load_prompt().format(prompt=prompt),
+                    "content":  load_prompt_full_ai().format(prompt=prompt) if mode == "full_ai" else  load_prompt_custom_algorithm().format(prompt=prompt)
                 }
             ],
             # model="gpt-4-0125-preview",
@@ -169,9 +204,10 @@ def ai(prompt: str) -> t.Optional[str]:
         return None
 
 
-def main(prompt: str) -> str:
+def custom_approach(prompt: str) -> str:
     try:
-        # Sanitize user input
+        reload_data()
+
         sanitized_prompt: str = html.escape(prompt)
         
         replaced: t.Optional[str] = replace_words(text=sanitized_prompt)
@@ -182,20 +218,55 @@ def main(prompt: str) -> str:
         if translated is None:
             return "Error occurred during translation."
         
-        fixed: t.Optional[str] = ai(translated)
+        fixed: t.Optional[str] = ai(translated, mode="custom_algorithm")
         if fixed is None:
             return "Error occurred during AI completion."
         
         return fixed
     
     except Exception as e:
-        logging.error(f"Main function failed: {e}")
+        logging.error(f"Custom Approach failed: {e}")
         return "An error occurred."
 
 
+def full_ai_approach(prompt) -> str:
+    try:
+        reload_data()
+
+        sanitized_prompt: str = html.escape(prompt)
+        fixed: t.Optional[str] = ai(sanitized_prompt, mode="full_ai")
+        if fixed is None:
+            return "Error occurred during AI completion."
+        
+        return fixed
+    
+    except Exception as e:
+        logging.error(f"Custom Approach failed: {e}")
+        return "An error occurred."
+
+
+def main(prompt: str, algorithm: str) -> t.Optional[str]:
+    """
+    Translate a math question from Sinhala to English using the selected algorithm.
+
+    Args:
+        prompt (str): The original math question in Sinhala.
+        algorithm (str): The selected algorithm ('Custom Algorithm' or 'Full AI Translation').
+
+    Returns:
+        Optional[str]: The corrected math question in English, or None if an error occurs.
+    """
+    if algorithm == "Custom Algorithm":
+        return custom_approach(prompt)
+    elif algorithm == "Full AI Translation":
+        return full_ai_approach(prompt)
+    else:
+        return None
+
 iface: gr.Interface = gr.Interface(
     fn=main, 
-    inputs="text", outputs="text",
+    inputs=["text", gr.Radio(["Custom Algorithm", "Full AI Translation"], label="Select Algorithm")],
+    outputs="text",
     title="Sinhala Math Question to English Translator",
     description="Translate Sinhala math questions from Sinhala to English for Sri Lankan GCE Advanced Level Examination.",
     examples=[
