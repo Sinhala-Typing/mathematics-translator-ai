@@ -3,6 +3,7 @@
 
 import logging
 import os
+import typing as t
 
 import html
 import gradio as gr
@@ -13,12 +14,15 @@ from openai import OpenAI
 # Parse a .env file and then load all the variables found as environment variables
 load_dotenv()
 
-# Basic Configuration
 # -----
 # OpenAI API Key, get yours here: https://platform.openai.com/api-keys
+# -----
 openai_api_key = os.getenv("API_KEY")
 
-def load_data():
+# -----
+# Support Functions
+# -----
+def load_data() -> t.Dict[str,str]:
     """
     Load data for the program.
 
@@ -39,6 +43,9 @@ def load_data():
             "ලබ්ධිය": "quotient",
         }
     return data
+
+def load_prompt() -> str:
+    return "**Math Question Correction:**\n\nPlease correct the following math question. The question is originally in Sinhala but has been translated into English. Ensure the grammar, syntax, and clarity of the question. Also, make sure the question has proper meaning. If there are any mathematical errors, correct them as well. Your response should be a properly formatted math question. (This is for Sri Lankan GCE Andvanced Level High School Examination). Dont add anything additional. This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. These are questions. Make sure the question makes sense. You may swap its order or order of words if needed.\n\n**Original Question (Translated from Sinhala):**\n\n\"{prompt}\"\n\n**Corrected Question:**\n\n"
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -74,7 +81,7 @@ class MathQuestionTranslator:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"**Math Question Correction:**\n\nPlease correct the following math question. The question is originally in Sinhala but has been translated into English. Ensure the grammar, syntax, and clarity of the question. Also, make sure the question has proper meaning. If there are any mathematical errors, correct them as well. Your response should be a properly formatted math question. (This is for Sri Lankan GCE Andvanced Level High School Examination). Dont add anything additional. This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. These are questions. Make sure the question makes sense. You may swap its order or order of words if needed.\n\n**Original Question (Translated from Sinhala):**\n\n\"{prompt}\"\n\n**Corrected Question:**\n\n",
+                        "content": load_prompt().format(prompt=prompt),
                     }
                 ],
                 model="gpt-4-0125-preview",
@@ -86,8 +93,7 @@ class MathQuestionTranslator:
 
     def translate_question(self, prompt):
         try:
-            sanitized_prompt = html.escape(prompt)
-            replaced = self.replace_words(sanitized_prompt)
+            replaced = self.replace_words(prompt)
             if replaced is None:
                 return "Error occurred during Stage 1: word replacement."
 
@@ -114,8 +120,6 @@ iface = gr.Interface(
     examples=[
         ["දීර්ග බෙදීම මගින් පහත බහුපද ඉදිරියෙන් දැක්වෙන ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"]
     ],
-    allow_flagging=True,
-    flagging_dir="flagged",
     api_name="translate",
 )
 iface.launch()
