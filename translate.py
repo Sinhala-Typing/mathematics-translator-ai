@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from googletrans import Translator
+from googletrans import Translator # pip install googletrans-py
 
 app = Flask(__name__)
 
