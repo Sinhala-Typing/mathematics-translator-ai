@@ -135,6 +135,7 @@ def main(prompt: str) -> str:
             return "Error occurred during AI completion."
         
         return fixed
+    
     except Exception as e:
         logging.error(f"Main function failed: {e}")
         return "An error occurred."
@@ -146,7 +147,7 @@ iface: gr.Interface = gr.Interface(
     title="Sinhala Math Question to English Translator",
     description="Translate Sinhala math questions from Sinhala to English for Sri Lankan GCE Advanced Level Examination.",
     examples=[
-        ["දීර්ග බෙදීම මගින් පහත බහුපද ඉදිරියෙන් දැක්වෙන ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"]
+        ["දීර්ග බෙදීම මගින් පහත බහුපද ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"]
     ],
     # allow_flagging=True,
     flagging_dir="flagged",
