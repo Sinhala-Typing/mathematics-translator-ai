@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # -----
 # OpenAI API Key, get yours here: https://platform.openai.com/api-keys
 # -----
-openai_api_key = os.getenv("API_KEY")
+openai_api_key: t.Optional[str] = os.getenv("API_KEY")
 
 # -----
 # Support Functions
@@ -36,7 +36,7 @@ def load_data() -> t.Dict[str,str]:
         dict: A dictionary containing data for the program.
             Keys are Sinhala phrases and values are their corresponding English translations.
     """
-    data = {
+    data: t.Dict[str, str] = {
             "දීර්ග බෙදීම": "long division",
             "මගින්": "using it",
             "බහුපද": "polynomials",
@@ -47,6 +47,16 @@ def load_data() -> t.Dict[str,str]:
     return data
 
 def load_prompt() -> str:
+    """
+    Generate a prompt for the AI model.
+
+    This function generates a prompt to be used by the AI model for correcting math questions.
+    The prompt includes instructions for correcting the question, as well as placeholders for the original and corrected questions.
+    The functionality of this function may be replaced by the user if needed to customize the prompt.
+
+    Returns:
+        str: A string containing the prompt for the AI model.    
+    """
     txt = "**Math Question Correction:**\n\n " 
     txt += "Please correct the following math question. "
     txt += "The question is originally in Sinhala but has been translated into English. "
@@ -68,9 +78,9 @@ def load_prompt() -> str:
 
 client = OpenAI(api_key=openai_api_key)
 
-data = load_data()
+data: t.Dict[str, str] = load_data()
 
-def translate_words(text: str):
+def translate_words(text: str) -> str | None:
     try:
         translator = Translator()
         translation = translator.translate(text, src='si', dest='en')
@@ -138,7 +148,7 @@ iface = gr.Interface(
     examples=[
         ["දීර්ග බෙදීම මගින් පහත බහුපද ඉදිරියෙන් දැක්වෙන ප්‍රකාශනයන් බෙදූ විට ලැබෙන ශේෂය හා ලබ්ධිය සොයන්න"]
     ],
-    allow_flagging=True,
+    # allow_flagging=True,
     flagging_dir="flagged",
     api_name="translate",
 )
