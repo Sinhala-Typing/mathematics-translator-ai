@@ -1,17 +1,36 @@
-import os
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import logging
+import os
+
+import html
+import gradio as gr
 from dotenv import load_dotenv
 from googletrans import Translator
 from openai import OpenAI
-import gradio as gr
-import html
 
+# Parse a .env file and then load all the variables found as environment variables
 load_dotenv()
 
-class MathQuestionTranslator:
-    def __init__(self, openai_api_key):
-        self.client = OpenAI(api_key=openai_api_key)
-        self.data = {
+# Basic Configuration
+# -----
+# OpenAI API Key, get yours here: https://platform.openai.com/api-keys
+openai_api_key = os.getenv("API_KEY")
+
+def load_data():
+    """
+    Load data for the program.
+
+    This function should be replaced by the user to suit their needs.
+    According to the default config, this function should not take in any parameters.
+    This function must return a dictionary data type for the program to work.
+
+    Returns:
+        dict: A dictionary containing data for the program.
+            Keys are Sinhala phrases and values are their corresponding English translations.
+    """
+    data = {
             "දීර්ග බෙදීම": "long division",
             "මගින්": "using it",
             "බහුපද": "polynomials",
@@ -19,8 +38,18 @@ class MathQuestionTranslator:
             "ශේෂය": "remainder",
             "ලබ්ධිය": "quotient",
         }
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    return data
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class MathQuestionTranslator:
+    def __init__(self, openai_api_key):
+        self.client = OpenAI(api_key=openai_api_key)
+        self.data = None
+
+    def load_data(self):
+        self.data = load_data()
+    
     def translate_words(self, text):
         try:
             translator = Translator()
@@ -60,22 +89,21 @@ class MathQuestionTranslator:
             sanitized_prompt = html.escape(prompt)
             replaced = self.replace_words(sanitized_prompt)
             if replaced is None:
-                return "Error occurred during word replacement."
+                return "Error occurred during Stage 1: word replacement."
 
             translated = self.translate_words(replaced)
             if translated is None:
-                return "Error occurred during translation."
+                return "Error occurred during Stage 2: translation."
 
             fixed = self.ai(translated)
             if fixed is None:
-                return "Error occurred during AI completion."
+                return "Error occurred during Stage 3: AI completion."
 
             return fixed
         except Exception as e:
             logging.error(f"Translation process failed: {e}")
             return "An error occurred."
 
-openai_api_key = os.getenv("API_KEY")
 translator = MathQuestionTranslator(openai_api_key)
 
 iface = gr.Interface(
