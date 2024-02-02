@@ -47,7 +47,23 @@ def load_data() -> t.Dict[str,str]:
     return data
 
 def load_prompt() -> str:
-    return "**Math Question Correction:**\n\nPlease correct the following math question. The question is originally in Sinhala but has been translated into English. Ensure the grammar, syntax, and clarity of the question. Also, make sure the question has proper meaning. If there are any mathematical errors, correct them as well. Your response should be a properly formatted math question. (This is for Sri Lankan GCE Andvanced Level High School Examination). Dont add anything additional. This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. These are questions. Make sure the question makes sense. You may swap its order or order of words if needed.\n\n**Original Question (Translated from Sinhala):**\n\n\"{prompt}\"\n\n**Corrected Question:**\n\n"
+    txt = "**Math Question Correction:**\n\n " 
+    txt += "Please correct the following math question. "
+    txt += "The question is originally in Sinhala but has been translated into English. "
+    txt += "Ensure the grammar, syntax, and clarity of the question. "
+    txt += "Also, make sure the question has proper meaning. "
+    txt += "If there are any mathematical errors, correct them as well. "
+    txt += "Your response should be a properly formatted math question. "
+    txt +=  "\n\n**Original Question (Translated from Sinhala):**\n\n"
+    txt += "(This is for Sri Lankan GCE Andvanced Level High School Examination). "
+    txt += "Dont add anything additional. "
+    txt += "This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. "
+    txt += "These are questions. Make sure the question makes sense. "
+    txt += "You may swap its order or order of words if needed."
+    txt += "\"{prompt}\""
+    txt += "\n\n**Corrected Question:**\n\n"
+    
+    return txt
 
 
 client = OpenAI(api_key=openai_api_key)
