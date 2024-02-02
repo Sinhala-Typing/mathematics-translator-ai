@@ -32,9 +32,9 @@ def load_data() -> t.Dict[str, str]:
     According to the default config, this function should not take in any parameters.
     This function must return a dictionary data type for the program to work.
 
-    Returns:
-        dict: A dictionary containing data for the program.
-            Keys are Sinhala phrases and values are their corresponding English translations.
+    @return: A dictionary containing data for the program.
+             Keys are Sinhala phrases and values are their corresponding English translations.
+    @rtype: dict
     """
     data: t.Dict[str, str] = {
             "දීර්ග බෙදීම": "long division",
@@ -55,8 +55,8 @@ def load_prompt_custom_algorithm() -> str:
     The prompt includes instructions for correcting the question, as well as placeholders for the original and corrected questions.
     The functionality of this function may be replaced by the user if needed to customize the prompt.
 
-    Returns:
-        str: A string containing the prompt for the AI model.    
+    @return: A string containing the prompt for the AI model.
+    @rtype: str
     """
     txt: str = "**Math Question Correction:**\n\n " 
     txt += "Please correct the following math question. "
@@ -77,6 +77,16 @@ def load_prompt_custom_algorithm() -> str:
 
 
 def load_prompt_full_ai() -> str:
+    """
+    Generate a prompt for the AI model.
+
+    This function generates a prompt to be used by the AI model for translating math questions.
+    The prompt includes instructions for translating the question, as well as placeholders for the original and translated questions.
+    The functionality of this function may be replaced by the user if needed to customize the prompt.
+
+    @return: A string containing the prompt for the AI model.
+    @rtype: str
+    """
     global data
     txt: str = "**Math Question Translation from Sinhala to English:**\n\n " 
     txt += "Please translate the following math question. Dont refer to the chat history. Treat this as a completely new question. "
@@ -98,6 +108,7 @@ def load_prompt_full_ai() -> str:
     txt += "\n\n**Corrected Question:**\n\n"
     return txt
 
+
 # -----
 # Program Code
 # -----
@@ -107,6 +118,9 @@ data: t.Dict[str, str] = load_data()
 
 
 def reload_data():
+    """
+    Reload data from the source.
+    """
     global data
     data = load_data()
     
@@ -116,18 +130,11 @@ def replace_words(text: str) -> t.Optional[str]:
     Stage 1 of Translation: Replace Sinhala words in the given text with their corresponding English translations.
     Used only in "Custom Algorithm" approach.
     
-    Args:
-        text (str): The input text containing Sinhala words to be replaced.
-
-    Returns:
-        Optional[str]: The input text with Sinhala words replaced by their English translations, or None if an error occurs.
-
-    Raises:
-        Any Exception: If an error occurs during the replacement process.
-
-    Notes:
-        - This function iterates through the items in the `data` dictionary, where keys are Sinhala phrases and values are their English translations.
-        - Each Sinhala phrase found in the input `text` is replaced with its corresponding English translation.
+    @param text: The input text containing Sinhala words to be replaced.
+    @type text: str
+    
+    @return: The input text with Sinhala words replaced by their English translations, or None if an error occurs.
+    @rtype: str | None
     """
     try:
         for k, v in data.items():
@@ -143,19 +150,11 @@ def translate_words(text: str) -> t.Optional[str]:
     Stage 2 of Translation: Translate Sinhala text to English using Google Translate.
     Used only in "Custom Algorithm" approach.
 
-    Args:
-        text (str): The input Sinhala text to be translated.
-
-    Returns:
-        Optional[str]: The translated English text, or None if an error occurs.
-
-    Raises:
-        Any Exception: If an error occurs during the translation process.
-
-    Notes:
-        - This function uses the Google Translate API through the `googletrans-py` library.
-        - The input `text` is translated from Sinhala (`src='si'`) to English (`dest='en'`).
-        - The translated text is returned.
+    @param text: The input Sinhala text to be translated.
+    @type text: str
+    
+    @return: The translated English text, or None if an error occurs.
+    @rtype: str | None
     """
     try:
         translator = Translator()
@@ -170,22 +169,14 @@ def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai") 
     """
     Perform AI-based correction of a math question.
 
-    Args:
-        prompt (str): The input math question in Sinhala Unicode.
-        mode (Literal["full_ai", "custom_algorithm"], optional): The mode of operation.
-            Either "full_ai" or "custom_algorithm". Defaults to "full_ai".
-
-    Returns:
-        Optional[str]: The corrected math question in English, or None if an error occurs.
-
-    Raises:
-        ValueError: If the mode is not one of "full_ai" or "custom_algorithm".
-        Any Exception: If an error occurs during the AI completion process.
-
-    Notes:
-        - This function uses the OpenAI API to generate a corrected version of the input math question.
-        - The input `prompt` is included in a formatted string to create a prompt for the AI model.
-        - The completion generated by the AI model is returned as the corrected math question in English.
+    @param prompt: The input math question in Sinhala Unicode.
+    @type prompt: str
+    
+    @param mode: The mode of operation. Either "full_ai" or "custom_algorithm". Defaults to "full_ai".
+    @type mode: str
+    
+    @return: The corrected math question in English, or None if an error occurs.
+    @rtype: str | None
     """
     try:
         chat_completion = client.chat.completions.create(
@@ -205,6 +196,15 @@ def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai") 
 
 
 def custom_approach(prompt: str) -> str:
+    """
+    Translate a math question from Sinhala to English using a custom algorithm.
+
+    @param prompt: The original math question in Sinhala.
+    @type prompt: str
+    
+    @return: The translated math question in English.
+    @rtype: str
+    """
     try:
         reload_data()
 
@@ -230,6 +230,15 @@ def custom_approach(prompt: str) -> str:
 
 
 def full_ai_approach(prompt) -> str:
+    """
+    Translate a math question from Sinhala to English using full AI translation.
+
+    @param prompt: The original math question in Sinhala.
+    @type prompt: str
+    
+    @return: The translated math question in English.
+    @rtype: str
+    """
     try:
         reload_data()
 
@@ -249,12 +258,14 @@ def main(prompt: str, algorithm: str) -> t.Optional[str]:
     """
     Translate a math question from Sinhala to English using the selected algorithm.
 
-    Args:
-        prompt (str): The original math question in Sinhala.
-        algorithm (str): The selected algorithm ('Custom Algorithm' or 'Full AI Translation').
-
-    Returns:
-        Optional[str]: The corrected math question in English, or None if an error occurs.
+    @param prompt: The original math question in Sinhala.
+    @type prompt: str
+    
+    @param algorithm: The selected algorithm ('Custom Algorithm' or 'Full AI Translation').
+    @type algorithm: str
+    
+    @return: The corrected math question in English, or None if an error occurs.
+    @rtype: str | None
     """
     if algorithm == "Custom Algorithm":
         return custom_approach(prompt)
@@ -262,6 +273,7 @@ def main(prompt: str, algorithm: str) -> t.Optional[str]:
         return full_ai_approach(prompt)
     else:
         return None
+
 
 iface: gr.Interface = gr.Interface(
     fn=main, 
