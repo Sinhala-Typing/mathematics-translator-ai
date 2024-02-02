@@ -163,3 +163,4 @@ cython_debug/
 # ----------------------
 .env
 api_key.txt
+flagged/
