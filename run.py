@@ -165,7 +165,7 @@ def translate_words(text: str) -> t.Optional[str]:
         return None
  
 
-def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai") -> t.Optional[str]:
+def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai", model: str = "gpt-3.5-turbo-0125") -> t.Optional[str]:
     """
     Perform AI-based correction of a math question.
 
@@ -174,6 +174,9 @@ def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai") 
     
     @param mode: The mode of operation. Either "full_ai" or "custom_algorithm". Defaults to "full_ai".
     @type mode: str
+    
+    @param model: The model to use for AI completion. Either "gpt-3.5-turbo-0125" or "gpt-4-0125-preview". Defaults to "gpt-3.5-turbo-0125".
+    @type model: str
     
     @return: The corrected math question in English, or None if an error occurs.
     @rtype: str | None
@@ -186,8 +189,7 @@ def ai(prompt: str, mode: t.Literal["full_ai", "custom_algorithm"] = "full_ai") 
                     "content":  load_prompt_full_ai().format(prompt=prompt) if mode == "full_ai" else  load_prompt_custom_algorithm().format(prompt=prompt)
                 }
             ],
-            # model="gpt-4-0125-preview",
-            model="gpt-3.5-turbo-0125",
+            model=model,
         )
         return chat_completion.choices[0].message.content
     except Exception as e:
@@ -254,15 +256,18 @@ def full_ai_approach(prompt) -> str:
         return "An error occurred."
 
 
-def main(prompt: str, algorithm: str) -> t.Optional[str]:
+def main(prompt: str, algorithm: str, model: str) -> t.Optional[str]:
     """
-    Translate a math question from Sinhala to English using the selected algorithm.
+    Translate a math question from Sinhala to English using the selected algorithm and model.
 
     @param prompt: The original math question in Sinhala.
     @type prompt: str
     
     @param algorithm: The selected algorithm ('Custom Algorithm' or 'Full AI Translation').
     @type algorithm: str
+    
+    @param model: The selected model ('gpt-3.5-turbo-0125' or 'gpt-4-0125-preview').
+    @type model: str
     
     @return: The corrected math question in English, or None if an error occurs.
     @rtype: str | None
@@ -277,7 +282,7 @@ def main(prompt: str, algorithm: str) -> t.Optional[str]:
 
 iface: gr.Interface = gr.Interface(
     fn=main, 
-    inputs=["text", gr.Radio(["Custom Algorithm", "Full AI Translation"], label="Select Algorithm")],
+    inputs=["text", gr.Radio(["Custom Algorithm", "Full AI Translation"], label="Select Algorithm"), gr.Radio(["gpt-3.5-turbo-0125", "gpt-4-0125-preview"], label="Select Model")],
     outputs="text",
     title="Sinhala Math Question to English Translator",
     description="Translate Sinhala math questions from Sinhala to English for Sri Lankan GCE Advanced Level Examination.",
