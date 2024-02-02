@@ -24,7 +24,7 @@ openai_api_key: t.Optional[str] = os.getenv("API_KEY")
 # -----
 # Support Functions
 # -----
-def load_data() -> t.Dict[str,str]:
+def load_data() -> t.Dict[str, str]:
     """
     Load data for the program.
 
@@ -57,30 +57,30 @@ def load_prompt() -> str:
     Returns:
         str: A string containing the prompt for the AI model.    
     """
-    txt = "**Math Question Correction:**\n\n " 
+    txt: str = "**Math Question Correction:**\n\n " 
     txt += "Please correct the following math question. "
     txt += "The question is originally in Sinhala but has been translated into English. "
     txt += "Ensure the grammar, syntax, and clarity of the question. "
     txt += "Also, make sure the question has proper meaning. "
     txt += "If there are any mathematical errors, correct them as well. "
     txt += "Your response should be a properly formatted math question. "
-    txt +=  "\n\n**Original Question (Translated from Sinhala):**\n\n"
     txt += "(This is for Sri Lankan GCE Andvanced Level High School Examination). "
     txt += "Dont add anything additional. "
     txt += "This prompt might not include the questions, and it may be a part of a question, so, just keep that in mind. "
     txt += "These are questions. Make sure the question makes sense. "
     txt += "You may swap its order or order of words if needed."
+    txt +=  "\n\n**Original Question (Translated from Sinhala):**\n\n"
     txt += "\"{prompt}\""
     txt += "\n\n**Corrected Question:**\n\n"
     
     return txt
 
 
-client = OpenAI(api_key=openai_api_key)
+client: OpenAI = OpenAI(api_key=openai_api_key)
 
 data: t.Dict[str, str] = load_data()
 
-def translate_words(text: str) -> str | None:
+def translate_words(text: str) -> t.Optional[str]:
     try:
         translator = Translator()
         translation = translator.translate(text, src='si', dest='en')
@@ -90,7 +90,7 @@ def translate_words(text: str) -> str | None:
         return None
 
 
-def replace_words(text: str):
+def replace_words(text: str) -> t.Optional[str]:
     try:
         for k, v in data.items():
             text = text.replace(k, v)
@@ -100,7 +100,7 @@ def replace_words(text: str):
         return None
 
 
-def ai(prompt: str):
+def ai(prompt: str) -> t.Optional[str]:
     try:
         chat_completion = client.chat.completions.create(
             messages=[
@@ -117,20 +117,20 @@ def ai(prompt: str):
         return None
 
 
-def main(prompt: str):
+def main(prompt: str) -> str:
     try:
         # Sanitize user input
-        sanitized_prompt = html.escape(prompt)
+        sanitized_prompt: str = html.escape(prompt)
         
-        replaced = replace_words(text=sanitized_prompt)
+        replaced: t.Optional[str] = replace_words(text=sanitized_prompt)
         if replaced is None:
             return "Error occurred during word replacement."
         
-        translated = translate_words(replaced)
+        translated: t.Optional[str] = translate_words(replaced)
         if translated is None:
             return "Error occurred during translation."
         
-        fixed = ai(translated)
+        fixed: t.Optional[str] = ai(translated)
         if fixed is None:
             return "Error occurred during AI completion."
         
@@ -140,7 +140,7 @@ def main(prompt: str):
         return "An error occurred."
 
 
-iface = gr.Interface(
+iface: gr.Interface = gr.Interface(
     fn=main, 
     inputs="text", outputs="text",
     title="Sinhala Math Question to English Translator",
