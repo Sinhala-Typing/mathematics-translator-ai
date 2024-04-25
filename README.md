@@ -1,5 +1,8 @@
 # Maths Jargon Sinhala to English Translator
 
+![Untitled-1](https://github.com/Sinhala-Typing/mathematics-translator-ai/assets/36286877/27ed59c1-9983-4f40-9f69-5b224099cb3a)
+
+
 This repository contains code for a Sinhala to English translator specifically designed for translating math jargon used in Sri Lankan GCE Advanced Level Examination questions. The translator aims to provide accurate translations of math-related terms and questions from Sinhala to English, facilitating understanding and communication for students and educators.
 
 ## Features
